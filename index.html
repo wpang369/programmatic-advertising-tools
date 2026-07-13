@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Programmatic Advertising Tools</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">Media operations toolkit</p>
+        <h1>Programmatic Advertising Tools</h1>
+      </div>
+      <div class="header-metrics" aria-label="Toolkit summary">
+        <span><strong>6</strong> tools</span>
+        <span><strong>0</strong> dependencies</span>
+      </div>
+    </header>
+
+    <main class="app-shell">
+      <nav class="tabs" aria-label="Tool navigation">
+        <button class="tab-button is-active" data-tab="kpi">KPI</button>
+        <button class="tab-button" data-tab="utm">UTM</button>
+        <button class="tab-button" data-tab="pixel">Pixel QA</button>
+        <button class="tab-button" data-tab="dashboard">Dashboard</button>
+        <button class="tab-button" data-tab="tag">Ad Tag</button>
+        <button class="tab-button" data-tab="json">Bid JSON</button>
+      </nav>
+
+      <section id="kpi" class="tool-panel is-active" aria-labelledby="kpi-title">
+        <div class="panel-heading">
+          <h2 id="kpi-title">Campaign KPI Calculator</h2>
+          <p>Calculate core delivery and efficiency metrics from campaign totals.</p>
+        </div>
+        <form id="kpi-form" class="tool-grid">
+          <label>
+            Spend
+            <input type="number" id="spend" min="0" step="0.01" value="12500">
+          </label>
+          <label>
+            Impressions
+            <input type="number" id="impressions" min="0" step="1" value="2400000">
+          </label>
+          <label>
+            Clicks
+            <input type="number" id="clicks" min="0" step="1" value="8420">
+          </label>
+          <label>
+            Conversions
+            <input type="number" id="conversions" min="0" step="1" value="318">
+          </label>
+        </form>
+        <div class="metric-grid" id="kpi-results"></div>
+      </section>
+
+      <section id="utm" class="tool-panel" aria-labelledby="utm-title">
+        <div class="panel-heading">
+          <h2 id="utm-title">UTM Builder</h2>
+          <p>Generate tagged URLs for GA4 campaign tracking.</p>
+        </div>
+        <form id="utm-form" class="tool-grid">
+          <label class="wide">
+            Landing page URL
+            <input type="url" id="base-url" value="https://example.com/landing-page">
+          </label>
+          <label>
+            Source
+            <input type="text" id="utm-source" value="dv360">
+          </label>
+          <label>
+            Medium
+            <input type="text" id="utm-medium" value="programmatic">
+          </label>
+          <label>
+            Campaign
+            <input type="text" id="utm-campaign" value="summer_awareness">
+          </label>
+          <label>
+            Term
+            <input type="text" id="utm-term" placeholder="audience or keyword">
+          </label>
+          <label>
+            Content
+            <input type="text" id="utm-content" placeholder="creative or placement">
+          </label>
+        </form>
+        <div class="output-box">
+          <div class="output-actions">
+            <strong>Generated URL</strong>
+            <button id="copy-utm" type="button">Copy</button>
+          </div>
+          <textarea id="utm-output" readonly rows="4"></textarea>
+        </div>
+      </section>
+
+      <section id="pixel" class="tool-panel" aria-labelledby="pixel-title">
+        <div class="panel-heading">
+          <h2 id="pixel-title">Pixel QA Checklist</h2>
+          <p>Track validation for base pixels, conversion events, GTM, and network requests.</p>
+        </div>
+        <div class="qa-summary">
+          <div>
+            <span id="qa-count">0 of 0 complete</span>
+            <div class="progress-track"><span id="qa-progress"></span></div>
+          </div>
+          <button id="reset-qa" type="button">Reset</button>
+        </div>
+        <div id="qa-list" class="checklist"></div>
+      </section>
+
+      <section id="dashboard" class="tool-panel" aria-labelledby="dashboard-title">
+        <div class="panel-heading">
+          <h2 id="dashboard-title">Programmatic Campaign Dashboard</h2>
+          <p>Paste CSV or JSON campaign data to view pacing, delivery, CTR, CPA, and CPM.</p>
+        </div>
+        <div class="dashboard-controls">
+          <button id="load-sample" type="button">Load Sample</button>
+          <label class="file-control">
+            Upload CSV
+            <input type="file" id="campaign-file" accept=".csv,text/csv">
+          </label>
+        </div>
+        <textarea id="campaign-input" rows="8" spellcheck="false" placeholder="campaign,budget,spend,impressions,clicks,conversions"></textarea>
+        <div class="metric-grid" id="dashboard-summary"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Campaign</th>
+                <th>Pacing</th>
+                <th>Spend</th>
+                <th>Imps</th>
+                <th>CTR</th>
+                <th>CPA</th>
+                <th>CPM</th>
+              </tr>
+            </thead>
+            <tbody id="campaign-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="tag" class="tool-panel" aria-labelledby="tag-title">
+        <div class="panel-heading">
+          <h2 id="tag-title">Ad Tag Formatter and Validator</h2>
+          <p>Check common ad tag requirements before trafficking.</p>
+        </div>
+        <textarea id="tag-input" rows="10" spellcheck="false" placeholder="Paste an iframe, script tag, VAST URL, or image tag"></textarea>
+        <div id="tag-results" class="validation-list"></div>
+      </section>
+
+      <section id="json" class="tool-panel" aria-labelledby="json-title">
+        <div class="panel-heading">
+          <h2 id="json-title">OpenRTB JSON Viewer</h2>
+          <p>Paste bid request JSON and review key fields in a readable format.</p>
+        </div>
+        <textarea id="json-input" rows="10" spellcheck="false" placeholder='{"id":"req-123","imp":[{"banner":{"w":300,"h":250}}]}'></textarea>
+        <div id="json-error" class="error-message" role="alert"></div>
+        <div id="json-fields" class="field-list"></div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
