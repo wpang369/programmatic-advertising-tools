@@ -1,4 +1,3 @@
-const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 const number = new Intl.NumberFormat("en-US");
 const percent = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
 
@@ -51,6 +50,44 @@ function readNumber(id) {
   return Number(document.getElementById(id).value) || 0;
 }
 
+function getCurrencySettings() {
+  const source = document.getElementById("source-currency").value;
+  const target = document.getElementById("target-currency").value;
+  const enteredRate = Number(document.getElementById("exchange-rate").value);
+  const rate = enteredRate > 0 ? enteredRate : 1;
+
+  return { source, target, rate };
+}
+
+function convertedMoney(value) {
+  const { source, target, rate } = getCurrencySettings();
+  return source === target ? value : value * rate;
+}
+
+function formatMoney(value) {
+  const { target } = getCurrencySettings();
+
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: target
+  }).format(convertedMoney(value));
+}
+
+function updateCurrencyStatus() {
+  const { source, target, rate } = getCurrencySettings();
+  const status = document.getElementById("currency-status");
+
+  status.textContent = source === target
+    ? `Values are displayed in ${target} without conversion.`
+    : `Values are converted from ${source} to ${target} at ${rate} ${target} per 1 ${source}.`;
+}
+
+function updateMoneyViews() {
+  updateCurrencyStatus();
+  updateKpis();
+  updateDashboard();
+}
+
 function metricCard(label, value, note = "") {
   return `<article class="metric-card"><span>${label}</span><strong>${value}</strong><small>${note}</small></article>`;
 }
@@ -67,9 +104,9 @@ function updateKpis() {
 
   document.getElementById("kpi-results").innerHTML = [
     metricCard("CTR", `${percent.format(ctr)}%`, "Clicks divided by impressions"),
-    metricCard("CPC", money.format(cpc), "Spend divided by clicks"),
-    metricCard("CPA", money.format(cpa), "Spend divided by conversions"),
-    metricCard("CPM", money.format(cpm), "Spend per 1,000 impressions")
+    metricCard("CPC", formatMoney(cpc), "Spend divided by clicks"),
+    metricCard("CPA", formatMoney(cpa), "Spend divided by conversions"),
+    metricCard("CPM", formatMoney(cpm), "Spend per 1,000 impressions")
   ].join("");
 }
 
@@ -182,10 +219,10 @@ function updateDashboard() {
     }, { budget: 0, spend: 0, impressions: 0, clicks: 0, conversions: 0 });
 
     summary.innerHTML = [
-      metricCard("Total spend", money.format(totals.spend), `${percent.format(safeDivide(totals.spend, totals.budget) * 100)}% of budget`),
+      metricCard("Total spend", formatMoney(totals.spend), `${percent.format(safeDivide(totals.spend, totals.budget) * 100)}% of budget`),
       metricCard("Impressions", number.format(totals.impressions), "Delivered media volume"),
       metricCard("CTR", `${percent.format(safeDivide(totals.clicks, totals.impressions) * 100)}%`, `${number.format(totals.clicks)} clicks`),
-      metricCard("CPA", money.format(safeDivide(totals.spend, totals.conversions)), `${number.format(totals.conversions)} conversions`)
+      metricCard("CPA", formatMoney(safeDivide(totals.spend, totals.conversions)), `${number.format(totals.conversions)} conversions`)
     ].join("");
 
     table.innerHTML = campaigns.map((campaign) => {
@@ -197,11 +234,11 @@ function updateDashboard() {
         <tr>
           <td>${campaign.campaign}</td>
           <td class="pace">${percent.format(pacing)}%<span class="pace-bar"><span style="width: ${Math.min(pacing, 100)}%"></span></span></td>
-          <td>${money.format(campaign.spend)}</td>
+          <td>${formatMoney(campaign.spend)}</td>
           <td>${number.format(campaign.impressions)}</td>
           <td>${percent.format(ctr)}%</td>
-          <td>${money.format(cpa)}</td>
-          <td>${money.format(cpm)}</td>
+          <td>${formatMoney(cpa)}</td>
+          <td>${formatMoney(cpm)}</td>
         </tr>
       `;
     }).join("");
@@ -303,6 +340,7 @@ function initTabs() {
 function init() {
   initTabs();
   renderQaChecklist();
+  document.getElementById("currency-form").addEventListener("input", updateMoneyViews);
   document.getElementById("kpi-form").addEventListener("input", updateKpis);
   document.getElementById("utm-form").addEventListener("input", updateUtm);
   document.getElementById("copy-utm").addEventListener("click", async () => {
@@ -341,6 +379,7 @@ function init() {
     user: { id: "user-789" }
   }, null, 2);
 
+  updateCurrencyStatus();
   updateKpis();
   updateUtm();
   updateDashboard();

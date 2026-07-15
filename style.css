@@ -27,6 +27,7 @@ body {
 
 button,
 input,
+select,
 textarea {
   font: inherit;
 }
@@ -47,6 +48,7 @@ button:hover {
 
 button:focus-visible,
 input:focus-visible,
+select:focus-visible,
 textarea:focus-visible {
   outline: 3px solid rgba(37, 99, 235, 0.22);
   outline-offset: 2px;
@@ -121,6 +123,7 @@ h1 {
   gap: 8px;
   position: sticky;
   top: 18px;
+  grid-row: span 2;
 }
 
 .tab-button {
@@ -134,6 +137,38 @@ h1 {
   border-color: var(--accent);
   background: #e9f8f5;
   color: var(--accent-strong);
+}
+
+.currency-panel,
+.tool-panel {
+  grid-column: 2;
+}
+
+.currency-panel {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(0, 1.2fr);
+  gap: 18px;
+  align-items: end;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.currency-panel h2 {
+  margin-bottom: 6px;
+  font-size: 1rem;
+}
+
+.currency-panel p {
+  margin-bottom: 0;
+  color: var(--muted);
+}
+
+.currency-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
 }
 
 .tool-panel {
@@ -190,6 +225,7 @@ label.wide {
 }
 
 input,
+select,
 textarea {
   width: 100%;
   border: 1px solid var(--line);
@@ -198,7 +234,8 @@ textarea {
   color: var(--ink);
 }
 
-input {
+input,
+select {
   min-height: 42px;
   padding: 9px 11px;
 }
@@ -431,9 +468,15 @@ th {
     grid-template-columns: 1fr;
   }
 
+  .currency-panel,
+  .tool-panel {
+    grid-column: 1;
+  }
+
   .tabs {
     position: static;
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-row: auto;
   }
 
   .tab-button {
@@ -441,9 +484,14 @@ th {
   }
 
   .tool-grid,
+  .currency-grid,
   .metric-grid,
   .checklist {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .currency-panel {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -454,6 +502,7 @@ th {
 
   .tabs,
   .tool-grid,
+  .currency-grid,
   .metric-grid,
   .checklist {
     grid-template-columns: 1fr;
