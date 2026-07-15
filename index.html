@@ -28,6 +28,41 @@
         <button class="tab-button" data-tab="json">Bid JSON</button>
       </nav>
 
+      <section class="currency-panel" aria-labelledby="currency-title">
+        <div>
+          <h2 id="currency-title">Currency Settings</h2>
+          <p id="currency-status">Values are displayed in USD without conversion.</p>
+        </div>
+        <form id="currency-form" class="currency-grid">
+          <label>
+            Input currency
+            <select id="source-currency">
+              <option value="USD">USD</option>
+              <option value="GBP">GBP</option>
+              <option value="EUR">EUR</option>
+              <option value="JPY">JPY</option>
+              <option value="AUD">AUD</option>
+              <option value="CAD">CAD</option>
+            </select>
+          </label>
+          <label>
+            Display currency
+            <select id="target-currency">
+              <option value="USD">USD</option>
+              <option value="GBP">GBP</option>
+              <option value="EUR">EUR</option>
+              <option value="JPY">JPY</option>
+              <option value="AUD">AUD</option>
+              <option value="CAD">CAD</option>
+            </select>
+          </label>
+          <label>
+            Exchange rate
+            <input type="number" id="exchange-rate" min="0.0001" step="0.0001" value="1">
+          </label>
+        </form>
+      </section>
+
       <section id="kpi" class="tool-panel is-active" aria-labelledby="kpi-title">
         <div class="panel-heading">
           <h2 id="kpi-title">Campaign KPI Calculator</h2>
