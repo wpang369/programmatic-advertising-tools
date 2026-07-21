@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css">
   </head>
   <body>
+    <!-- Header summarizes the toolkit without affecting any tool calculations. -->
     <header class="app-header">
       <div>
         <p class="eyebrow">Media operations toolkit</p>
@@ -19,6 +20,7 @@
     </header>
 
     <main class="app-shell">
+      <!-- Tab buttons switch between the individual tool panels. -->
       <nav class="tabs" aria-label="Tool navigation">
         <button class="tab-button is-active" data-tab="kpi">KPI</button>
         <button class="tab-button" data-tab="utm">UTM</button>
@@ -28,12 +30,20 @@
         <button class="tab-button" data-tab="json">Bid JSON</button>
       </nav>
 
+      <!-- Currency settings are shared by all money-based metrics. -->
       <section class="currency-panel" aria-labelledby="currency-title">
         <div>
           <h2 id="currency-title">Currency Settings</h2>
           <p id="currency-status">Values are displayed in USD without conversion.</p>
         </div>
         <form id="currency-form" class="currency-grid">
+          <label>
+            Rate source
+            <select id="rate-source">
+              <option value="manual">Contracted/manual</option>
+              <option value="live">Live reference</option>
+            </select>
+          </label>
           <label>
             Input currency
             <select id="source-currency">
@@ -60,9 +70,14 @@
             Exchange rate
             <input type="number" id="exchange-rate" min="0.0001" step="0.0001" value="1">
           </label>
+          <div class="currency-actions">
+            <button id="fetch-rate" type="button">Fetch live rate</button>
+            <small id="live-rate-status">Frankfurter rates are optional reference rates.</small>
+          </div>
         </form>
       </section>
 
+      <!-- KPI calculator for quick delivery and efficiency checks. -->
       <section id="kpi" class="tool-panel is-active" aria-labelledby="kpi-title">
         <div class="panel-heading">
           <h2 id="kpi-title">Campaign KPI Calculator</h2>
@@ -89,6 +104,7 @@
         <div class="metric-grid" id="kpi-results"></div>
       </section>
 
+      <!-- UTM builder for campaign URL tagging. -->
       <section id="utm" class="tool-panel" aria-labelledby="utm-title">
         <div class="panel-heading">
           <h2 id="utm-title">UTM Builder</h2>
@@ -129,6 +145,7 @@
         </div>
       </section>
 
+      <!-- Pixel QA checklist for trafficking and tracking validation. -->
       <section id="pixel" class="tool-panel" aria-labelledby="pixel-title">
         <div class="panel-heading">
           <h2 id="pixel-title">Pixel QA Checklist</h2>
@@ -144,6 +161,7 @@
         <div id="qa-list" class="checklist"></div>
       </section>
 
+      <!-- Campaign dashboard accepts pasted or uploaded CSV/JSON rows. -->
       <section id="dashboard" class="tool-panel" aria-labelledby="dashboard-title">
         <div class="panel-heading">
           <h2 id="dashboard-title">Programmatic Campaign Dashboard</h2>
@@ -176,6 +194,7 @@
         </div>
       </section>
 
+      <!-- Ad tag validator checks common trafficking requirements. -->
       <section id="tag" class="tool-panel" aria-labelledby="tag-title">
         <div class="panel-heading">
           <h2 id="tag-title">Ad Tag Formatter and Validator</h2>
@@ -185,6 +204,7 @@
         <div id="tag-results" class="validation-list"></div>
       </section>
 
+      <!-- Bid JSON viewer extracts readable fields from OpenRTB-like payloads. -->
       <section id="json" class="tool-panel" aria-labelledby="json-title">
         <div class="panel-heading">
           <h2 id="json-title">OpenRTB JSON Viewer</h2>

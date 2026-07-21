@@ -1,12 +1,16 @@
+// Shared formatters and constants used across the calculator and dashboard.
 const number = new Intl.NumberFormat("en-US");
 const percent = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
+const frankfurterApi = "https://api.frankfurter.dev/v2";
 
+// Starter data keeps the dashboard useful before a user pastes or uploads campaign rows.
 const sampleCampaignData = `campaign,budget,spend,impressions,clicks,conversions
 Awareness Prospecting,25000,17850,4200000,12620,310
 Retargeting Display,12000,9840,1180000,8850,522
 CTV Reach,40000,31100,2100000,1840,93
 Retail Media,18000,14250,960000,6120,280`;
 
+// Pixel QA checklist sections are rendered into interactive checkboxes on load.
 const qaGroups = [
   {
     title: "Base pixels",
@@ -43,6 +47,7 @@ const qaGroups = [
 ];
 
 function safeDivide(numerator, denominator) {
+  // KPI metrics should show 0 instead of Infinity when the source metric is empty.
   return denominator > 0 ? numerator / denominator : 0;
 }
 
@@ -51,12 +56,14 @@ function readNumber(id) {
 }
 
 function getCurrencySettings() {
+  // Manual mode supports contracted rates; live mode uses Frankfurter reference rates.
+  const rateSource = document.getElementById("rate-source").value;
   const source = document.getElementById("source-currency").value;
   const target = document.getElementById("target-currency").value;
   const enteredRate = Number(document.getElementById("exchange-rate").value);
   const rate = enteredRate > 0 ? enteredRate : 1;
 
-  return { source, target, rate };
+  return { rateSource, source, target, rate };
 }
 
 function convertedMoney(value) {
@@ -74,24 +81,72 @@ function formatMoney(value) {
 }
 
 function updateCurrencyStatus() {
-  const { source, target, rate } = getCurrencySettings();
+  const { rateSource, source, target, rate } = getCurrencySettings();
   const status = document.getElementById("currency-status");
 
   status.textContent = source === target
     ? `Values are displayed in ${target} without conversion.`
-    : `Values are converted from ${source} to ${target} at ${rate} ${target} per 1 ${source}.`;
+    : `Values are converted from ${source} to ${target} at ${rate} ${target} per 1 ${source} using ${rateSource === "live" ? "a live reference rate" : "a contracted/manual rate"}.`;
+}
+
+function updateRateSourceState() {
+  const { rateSource } = getCurrencySettings();
+  const rateInput = document.getElementById("exchange-rate");
+  const fetchButton = document.getElementById("fetch-rate");
+
+  rateInput.readOnly = rateSource === "live";
+  fetchButton.disabled = rateSource !== "live";
+  updateCurrencyStatus();
 }
 
 function updateMoneyViews() {
+  // Currency changes affect every money metric in the KPI calculator and dashboard.
+  updateRateSourceState();
   updateCurrencyStatus();
   updateKpis();
   updateDashboard();
+}
+
+async function fetchLiveExchangeRate() {
+  // Frankfurter returns public reference rates only; manual input remains the fallback.
+  const { source, target } = getCurrencySettings();
+  const status = document.getElementById("live-rate-status");
+  const button = document.getElementById("fetch-rate");
+  const rateInput = document.getElementById("exchange-rate");
+
+  if (source === target) {
+    rateInput.value = "1";
+    status.textContent = "Matching currencies use a 1.0000 rate.";
+    updateMoneyViews();
+    return;
+  }
+
+  button.disabled = true;
+  status.textContent = `Fetching ${source} to ${target} from Frankfurter...`;
+
+  try {
+    const response = await fetch(`${frankfurterApi}/rate/${source}/${target}`);
+    const data = await response.json();
+
+    if (!response.ok || data.base !== source || data.quote !== target || typeof data.rate !== "number") {
+      throw new Error(data.message || "Unexpected rate response");
+    }
+
+    rateInput.value = data.rate;
+    status.textContent = `Reference rate updated from Frankfurter for ${data.date}.`;
+    updateMoneyViews();
+  } catch (error) {
+    status.textContent = `Live rate unavailable. Use a manual contracted rate. ${error.message}`;
+  } finally {
+    button.disabled = document.getElementById("rate-source").value !== "live";
+  }
 }
 
 function metricCard(label, value, note = "") {
   return `<article class="metric-card"><span>${label}</span><strong>${value}</strong><small>${note}</small></article>`;
 }
 
+// Campaign KPI calculator.
 function updateKpis() {
   const spend = readNumber("spend");
   const impressions = readNumber("impressions");
@@ -110,6 +165,7 @@ function updateKpis() {
   ].join("");
 }
 
+// UTM builder.
 function updateUtm() {
   const base = document.getElementById("base-url").value.trim();
   const output = document.getElementById("utm-output");
@@ -137,6 +193,7 @@ function updateUtm() {
   }
 }
 
+// Pixel QA checklist.
 function renderQaChecklist() {
   const list = document.getElementById("qa-list");
   list.innerHTML = qaGroups.map((group, groupIndex) => `
@@ -161,7 +218,9 @@ function updateQaProgress() {
   document.getElementById("qa-progress").style.width = `${completion}%`;
 }
 
+// Campaign dashboard data parsing.
 function parseCsv(text) {
+  // This parser is intentionally lightweight for simple pasted/exported CSV rows.
   const lines = text.trim().split(/\r?\n/).filter(Boolean);
   if (lines.length < 2) {
     return [];
@@ -178,6 +237,7 @@ function parseCsv(text) {
 }
 
 function parseCampaignData(text) {
+  // Accept either pasted JSON or CSV so the dashboard can work with common exports.
   const trimmed = text.trim();
   if (!trimmed) {
     return [];
@@ -192,6 +252,7 @@ function parseCampaignData(text) {
 }
 
 function normalizedCampaign(row) {
+  // Normalize a few common column names before calculating delivery metrics.
   return {
     campaign: row.campaign || row.name || "Untitled campaign",
     budget: Number(row.budget) || 0,
@@ -202,6 +263,7 @@ function normalizedCampaign(row) {
   };
 }
 
+// Campaign dashboard rendering.
 function updateDashboard() {
   const input = document.getElementById("campaign-input");
   const table = document.getElementById("campaign-table");
@@ -248,6 +310,7 @@ function updateDashboard() {
   }
 }
 
+// Ad tag formatter and validator.
 function validateAdTag() {
   const tag = document.getElementById("tag-input").value;
   const checks = [
@@ -286,6 +349,7 @@ function validateAdTag() {
   }).join("");
 }
 
+// OpenRTB-style JSON viewer.
 function updateJsonViewer() {
   const input = document.getElementById("json-input").value.trim();
   const error = document.getElementById("json-error");
@@ -326,6 +390,7 @@ function updateJsonViewer() {
   }
 }
 
+// Tool navigation.
 function initTabs() {
   document.querySelectorAll(".tab-button").forEach((button) => {
     button.addEventListener("click", () => {
@@ -337,10 +402,28 @@ function initTabs() {
   });
 }
 
+// App bootstrapping and event wiring.
 function init() {
   initTabs();
   renderQaChecklist();
   document.getElementById("currency-form").addEventListener("input", updateMoneyViews);
+  document.getElementById("rate-source").addEventListener("change", () => {
+    updateMoneyViews();
+    if (document.getElementById("rate-source").value === "live") {
+      fetchLiveExchangeRate();
+    }
+  });
+  document.getElementById("source-currency").addEventListener("change", () => {
+    if (document.getElementById("rate-source").value === "live") {
+      fetchLiveExchangeRate();
+    }
+  });
+  document.getElementById("target-currency").addEventListener("change", () => {
+    if (document.getElementById("rate-source").value === "live") {
+      fetchLiveExchangeRate();
+    }
+  });
+  document.getElementById("fetch-rate").addEventListener("click", fetchLiveExchangeRate);
   document.getElementById("kpi-form").addEventListener("input", updateKpis);
   document.getElementById("utm-form").addEventListener("input", updateUtm);
   document.getElementById("copy-utm").addEventListener("click", async () => {
@@ -380,6 +463,7 @@ function init() {
   }, null, 2);
 
   updateCurrencyStatus();
+  updateRateSourceState();
   updateKpis();
   updateUtm();
   updateDashboard();
